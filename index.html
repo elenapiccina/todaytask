@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Today's Tasks ⚡️</title>
+    <title>Today's Tasks ⚡</title>
     <style>
         :root {
             --bg-inprogress: #e3f2fd; --text-inprogress: #1565c0; --dot-inprogress: #2196f3;
@@ -30,7 +30,6 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            position: relative;
         }
 
         .banner-header {
@@ -48,17 +47,6 @@
             letter-spacing: 2px;
             text-transform: uppercase;
             margin: 0;
-        }
-
-        .btn-header-reset {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            font-weight: bold;
         }
 
         .content-area { padding: 16px; }
@@ -92,16 +80,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-
-        .check-box {
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid #d0c4c6;
-            border-radius: 4px;
-            background: #ffffff;
-            cursor: pointer;
-            padding: 0;
         }
 
         .badge {
@@ -138,11 +116,11 @@
             border: none;
             color: #DDD2D4;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
         }
+        .btn-delete:hover { color: #2C2526; }
 
-        /* Form container to handle click events universally */
-        .input-panel-form {
+        .input-panel {
             display: flex;
             gap: 6px;
             border-top: 1px solid #EFEAE4;
@@ -174,34 +152,6 @@
             font-weight: bold;
             height: 30px;
         }
-
-        .dopamine-popup {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.98);
-            border: 2px solid #e91e63;
-            border-radius: 16px;
-            padding: 20px 24px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.2);
-            z-index: 100;
-            backdrop-filter: blur(4px);
-            width: 80%;
-            max-width: 320px;
-            box-sizing: border-box;
-        }
-
-        .dopamine-text {
-            font-size: 1.15rem;
-            font-weight: bold;
-            color: #c2185b;
-            margin: 0;
-            font-family: Georgia, serif;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -209,16 +159,14 @@
 <div class="widget-container">
     <div class="banner-header">
         <div class="banner-title">Today's 3 Tasks</div>
-        <button class="btn-header-reset" onclick="clearBoard()">🔄 Reset</button>
     </div>
     
     <div class="content-area">
         <div class="title-row" id="countRow">0 tasks</div>
         <div class="task-list" id="taskBox"></div>
 
-        <!-- Rebuilt with a real HTML form to make clicks completely bulletproof -->
-        <form class="input-panel-form" id="taskForm" onsubmit="handleFormSubmit(event)">
-            <input type="text" id="nameIn" class="input-name" placeholder="+ New page task..." required>
+        <div class="input-panel">
+            <input type="text" id="nameIn" class="input-name" placeholder="+ New task...">
             <select id="statusIn">
                 <option value="inprogress">In progress</option>
                 <option value="notstarted">Not started</option>
@@ -228,24 +176,19 @@
                 <option value="big">BIG</option>
                 <option value="urgent">urgent</option>
             </select>
-            <button type="submit" class="btn-add">Add</button>
-        </form>
-    </div>
-
-    <div class="dopamine-popup" id="dopamineAlert">
-        <p class="dopamine-text">🎉 Nailed it! <br>Brain dopamine activated.</p>
+            <button class="btn-add" onclick="addTask()">Add</button>
+        </div>
     </div>
 </div>
 
 <script>
-    let myTasks = [];
+    // Simple temporary list template array (No local storage barriers)
+    let myTasks = [
+        { name: "Яндекс облако видео Man", status: "inprogress", tag: "big" },
+        { name: "избранное wb, ozon", status: "inprogress", tag: "small" }
+    ];
 
     function renderTasks() {
-        // Safe check to ignore storage errors if browser blocks it
-        try {
-            localStorage.setItem('notion_todaytask_db', JSON.stringify(myTasks));
-        } catch(e) {}
-
         const box = document.getElementById('taskBox');
         box.innerHTML = '';
         document.getElementById('countRow').innerText = `${myTasks.length} tasks`;
@@ -260,19 +203,16 @@
             row.innerHTML = `
                 <div class="task-left">${task.name}</div>
                 <div class="task-right">
-                    <button class="check-box" onclick="triggerDopamine(${index})"></button>
                     <span class="badge status-${task.status}"><span class="badge-dot"></span>${statusLabel}</span>
                     <span class="badge tag-${task.tag}"><span class="badge-dot"></span>${tagLabel}</span>
-                    <button class="btn-delete" onclick="deleteItem(${index})">✕</button>
+                    <button class="btn-delete" onclick="deleteItem(${index})">✕ Done</button>
                 </div>
             `;
             box.appendChild(row);
         });
     }
 
-    function handleFormSubmit(event) {
-        event.preventDefault(); // Stop page reload
-        
+    function addTask() {
         const inputField = document.getElementById('nameIn');
         const textValue = inputField.value.trim();
         
@@ -288,31 +228,14 @@
         renderTasks();
     }
 
-    function triggerDopamine(index) {
-        const popup = document.getElementById('dopamineAlert');
-        popup.style.display = 'block';
-
-        setTimeout(() => {
-            popup.style.display = 'none';
-            myTasks.splice(index, 1);
-            renderTasks();
-        }, 2000);
-    }
-
     function deleteItem(index) {
         myTasks.splice(index, 1);
         renderTasks();
     }
 
-    function clearBoard() {
-        myTasks = [];
-        renderTasks();
-    }
+    // Initialize list rows on start load grid
+    renderTasks();
+</script>
 
-    // Shielded configuration loader matching any storage scenario
-    try {
-        let stored = localStorage.getItem('notion_todaytask_db');
-        if (stored) {
-            myTasks = JSON.parse(stored);
-        } else {
-            myTasks = [
+</body>
+</html>
