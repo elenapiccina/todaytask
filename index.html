@@ -6,21 +6,15 @@
     <title>Today's Tasks ⚡️</title>
     <style>
         :root {
-            --cream-bg: #FFFBF7;
-            --text-dark: #2C2526;
-            --text-muted: #746264;
-            --pink-banner-text: #ffffff;
-            
             --bg-inprogress: #e3f2fd; --text-inprogress: #1565c0; --dot-inprogress: #2196f3;
             --bg-notstarted: #eceff1; --text-notstarted: #455a64; --dot-notstarted: #90a4ae;
-            
             --bg-big: #fce4ec; --text-big: #c2185b; --dot-big: #e91e63;
             --bg-small: #e8f5e9; --text-small: #2e7d32; --dot-small: #4caf50;
             --bg-urgent: #ffebee; --text-urgent: #c62828; --dot-urgent: #f44336;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: transparent;
             margin: 0;
             padding: 4px;
@@ -35,15 +29,13 @@
             border: 1px solid #EFEAE4;
             border-radius: 12px;
             overflow: hidden;
-            box-sizing: border-box;
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
             position: relative;
         }
 
-        /* Header Layout Banner Box with reset alignment mapping */
         .banner-header {
-            background-color: #d85a7fff; 
-            color: var(--pink-banner-text);
+            background-color: #d85a7f; 
+            color: #ffffff;
             padding: 12px 16px;
             display: flex;
             justify-content: space-between;
@@ -58,7 +50,6 @@
             margin: 0;
         }
 
-        /* Clean Minimal Reset Link button styling */
         .btn-header-reset {
             background: rgba(255, 255, 255, 0.2);
             color: white;
@@ -68,7 +59,6 @@
             font-size: 0.75rem;
             cursor: pointer;
             font-weight: bold;
-            font-family: inherit;
         }
         .btn-header-reset:hover { background: rgba(255, 255, 255, 0.35); }
 
@@ -77,7 +67,7 @@
         .title-row {
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--text-dark);
+            color: #2C2526;
             margin-bottom: 12px;
         }
 
@@ -94,7 +84,7 @@
 
         .task-left {
             font-size: 0.95rem;
-            color: var(--text-dark);
+            color: #2C2526;
             flex: 1;
             padding-right: 12px;
         }
@@ -151,7 +141,6 @@
             cursor: pointer;
             font-size: 0.75rem;
         }
-        .btn-delete:hover { color: var(--text-dark); }
 
         .input-panel {
             display: flex;
@@ -167,7 +156,7 @@
             padding: 6px 10px;
             font-size: 0.85rem;
             outline: none;
-            color: var(--text-dark);
+            color: #2C2526;
             background: #ffffff;
             height: 30px;
             box-sizing: border-box;
@@ -175,7 +164,7 @@
         .input-name { flex: 1; }
 
         .btn-add {
-            background-color: var(--text-dark);
+            background-color: #2C2526;
             color: white;
             border: none;
             border-radius: 6px;
@@ -185,7 +174,7 @@
             font-weight: bold;
             height: 30px;
         }
-        .btn-add:hover { background-color: #d85a7fff; }
+        .btn-add:hover { background-color: #d85a7f; }
 
         .dopamine-popup {
             display: none;
@@ -193,7 +182,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border: 2px solid #e91e63;
             border-radius: 16px;
             padding: 20px 24px;
@@ -201,7 +190,6 @@
             box-shadow: 0 10px 30px rgba(233, 30, 99, 0.2);
             z-index: 100;
             backdrop-filter: blur(4px);
-            animation: popIn 0.3s ease-out;
             width: 80%;
             max-width: 320px;
             box-sizing: border-box;
@@ -215,11 +203,6 @@
             font-family: Georgia, serif;
             font-style: italic;
         }
-
-        @keyframes popIn {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
     </style>
 </head>
 <body>
@@ -227,7 +210,7 @@
 <div class="widget-container">
     <div class="banner-header">
         <div class="banner-title">Today's 3 Tasks</div>
-        <button class="btn-header-reset" onclick="resetDatabaseMemory()">🔄 Reset</button>
+        <button class="btn-header-reset" onclick="clearBoard()">🔄 Reset</button>
     </div>
     
     <div class="content-area">
@@ -255,14 +238,34 @@
 </div>
 
 <script>
-    let taskList = [];
-    
-    // Self-healing database validation routine
-    function loadValidatedMemory() {
-        try {
-            let data = localStorage.getItem('notion_dopamine_board_fixed');
-            if (data) {
-                let parsed = JSON.parse(data);
-                if (Array.isArray(parsed)) {
-                    // Check if properties match requirements tracking fields safely
-                    if (parsed.length === 0 || (parsed[0] && parsed[0].hasOwnProperty('tag'))) {
+    let myTasks = [];
+
+    function renderTasks() {
+        localStorage.setItem('notion_dopamine_clean_v1', JSON.stringify(myTasks));
+        const box = document.getElementById('taskBox');
+        box.innerHTML = '';
+        
+        document.getElementById('countRow').innerText = `${myTasks.length} tasks`;
+
+        myTasks.forEach((task, index) => {
+            const row = document.createElement('div');
+            row.className = 'task-item';
+
+            let statusLabel = task.status === 'inprogress' ? 'In progress' : 'Not started';
+            let tagLabel = task.tag === 'big' ? 'BIG' : task.tag;
+
+            row.innerHTML = `
+                <div class="task-left">${task.name}</div>
+                <div class="task-right">
+                    <button class="check-box" onclick="triggerDopamine(${index})"></button>
+                    <span class="badge status-${task.status}"><span class="badge-dot"></span>${statusLabel}</span>
+                    <span class="badge tag-${task.tag}"><span class="badge-dot"></span>${tagLabel}</span>
+                    <button class="btn-delete" onclick="deleteItem(${index})">✕</button>
+                </div>
+            `;
+            box.appendChild(row);
+        });
+    }
+
+    function addTask() {
+        const inputField = document.getElementById('nameIn');
