@@ -9,14 +9,11 @@
             --cream-bg: #FFFBF7;
             --text-dark: #2C2526;
             --text-muted: #746264;
-            --pink-banner: #D4A5B8;
             --pink-banner-text: #ffffff;
             
-            /* Status Dots & Background colors from your screenshot */
             --bg-inprogress: #e3f2fd; --text-inprogress: #1565c0; --dot-inprogress: #2196f3;
             --bg-notstarted: #eceff1; --text-notstarted: #455a64; --dot-notstarted: #90a4ae;
             
-            /* Priority Tags colors from your screenshot */
             --bg-big: #fce4ec; --text-big: #c2185b; --dot-big: #e91e63;
             --bg-small: #e8f5e9; --text-small: #2e7d32; --dot-small: #4caf50;
             --bg-urgent: #ffebee; --text-urgent: #c62828; --dot-urgent: #f44336;
@@ -43,17 +40,37 @@
             position: relative;
         }
 
-        /* Cute Aesthetic Pink Banner Top Window Header */
+        /* Header Layout Banner Box with reset alignment mapping */
         .banner-header {
-            background-color: #d85a7fff; /* Darker vibrant pink banner from your screenshot */
+            background-color: #d85a7fff; 
             color: var(--pink-banner-text);
-            text-align: center;
-            padding: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .banner-title {
             font-size: 1.4rem;
             font-weight: 800;
             letter-spacing: 2px;
             text-transform: uppercase;
+            margin: 0;
         }
+
+        /* Clean Minimal Reset Link button styling */
+        .btn-header-reset {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        .btn-header-reset:hover { background: rgba(255, 255, 255, 0.35); }
 
         .content-area { padding: 16px; }
 
@@ -64,7 +81,6 @@
             margin-bottom: 12px;
         }
 
-        /* List Layout Rows matching Notion exactly */
         .task-list { display: flex; flex-direction: column; }
 
         .task-item {
@@ -89,7 +105,6 @@
             gap: 12px;
         }
 
-        /* Circular Checkbox Layout */
         .check-box {
             width: 16px;
             height: 16px;
@@ -100,7 +115,6 @@
             padding: 0;
         }
 
-        /* Badges styling match */
         .badge {
             font-size: 0.8rem;
             padding: 3px 10px;
@@ -118,7 +132,6 @@
             display: inline-block;
         }
 
-        /* Badge color systems mapped */
         .status-inprogress { background: var(--bg-inprogress); color: var(--text-inprogress); }
         .status-inprogress .badge-dot { background: var(--dot-inprogress); }
         .status-notstarted { background: var(--bg-notstarted); color: var(--text-notstarted); }
@@ -140,7 +153,6 @@
         }
         .btn-delete:hover { color: var(--text-dark); }
 
-        /* Inputs Console bar panel layout */
         .input-panel {
             display: flex;
             gap: 6px;
@@ -175,7 +187,6 @@
         }
         .btn-add:hover { background-color: #d85a7fff; }
 
-        /* 🎉 Custom Aesthetic Dopamine Alert Box overlay window */
         .dopamine-popup {
             display: none;
             position: absolute;
@@ -214,7 +225,10 @@
 <body>
 
 <div class="widget-container">
-    <div class="banner-header">Today's 3 Tasks</div>
+    <div class="banner-header">
+        <div class="banner-title">Today's 3 Tasks</div>
+        <button class="btn-header-reset" onclick="resetDatabaseMemory()">🔄 Reset</button>
+    </div>
     
     <div class="content-area">
         <div class="title-row" id="countRow">0 tasks</div>
@@ -235,16 +249,20 @@
         </div>
     </div>
 
-    <!-- Hidden Dopamine Overlay container -->
     <div class="dopamine-popup" id="dopamineAlert">
         <p class="dopamine-text">🎉 Nailed it! <br>Brain dopamine activated.</p>
     </div>
 </div>
 
 <script>
-    let taskList = JSON.parse(localStorage.getItem('notion_dopamine_board')) || [
-        { id: 1, name: "Яндекс облако видео Man", status: "inprogress", tag: "big" },
-        { id: 2, name: "избранное wb, ozon", status: "inprogress", tag: "small" }
-    ];
-
-    function saveAndRender() {
+    let taskList = [];
+    
+    // Self-healing database validation routine
+    function loadValidatedMemory() {
+        try {
+            let data = localStorage.getItem('notion_dopamine_board_fixed');
+            if (data) {
+                let parsed = JSON.parse(data);
+                if (Array.isArray(parsed)) {
+                    // Check if properties match requirements tracking fields safely
+                    if (parsed.length === 0 || (parsed[0] && parsed[0].hasOwnProperty('tag'))) {
