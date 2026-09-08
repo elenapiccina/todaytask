@@ -60,7 +60,6 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .btn-header-reset:hover { background: rgba(255, 255, 255, 0.35); }
 
         .content-area { padding: 16px; }
 
@@ -142,7 +141,8 @@
             font-size: 0.75rem;
         }
 
-        .input-panel {
+        /* Form container to handle click events universally */
+        .input-panel-form {
             display: flex;
             gap: 6px;
             border-top: 1px solid #EFEAE4;
@@ -174,7 +174,6 @@
             font-weight: bold;
             height: 30px;
         }
-        .btn-add:hover { background-color: #d85a7f; }
 
         .dopamine-popup {
             display: none;
@@ -217,8 +216,9 @@
         <div class="title-row" id="countRow">0 tasks</div>
         <div class="task-list" id="taskBox"></div>
 
-        <div class="input-panel">
-            <input type="text" id="nameIn" class="input-name" placeholder="+ New page task...">
+        <!-- Rebuilt with a real HTML form to make clicks completely bulletproof -->
+        <form class="input-panel-form" id="taskForm" onsubmit="handleFormSubmit(event)">
+            <input type="text" id="nameIn" class="input-name" placeholder="+ New page task..." required>
             <select id="statusIn">
                 <option value="inprogress">In progress</option>
                 <option value="notstarted">Not started</option>
@@ -228,8 +228,8 @@
                 <option value="big">BIG</option>
                 <option value="urgent">urgent</option>
             </select>
-            <button class="btn-add" onclick="addTask()">Add</button>
-        </div>
+            <button type="submit" class="btn-add">Add</button>
+        </form>
     </div>
 
     <div class="dopamine-popup" id="dopamineAlert">
@@ -241,10 +241,13 @@
     let myTasks = [];
 
     function renderTasks() {
-        localStorage.setItem('notion_dopamine_clean_v1', JSON.stringify(myTasks));
+        // Safe check to ignore storage errors if browser blocks it
+        try {
+            localStorage.setItem('notion_todaytask_db', JSON.stringify(myTasks));
+        } catch(e) {}
+
         const box = document.getElementById('taskBox');
         box.innerHTML = '';
-        
         document.getElementById('countRow').innerText = `${myTasks.length} tasks`;
 
         myTasks.forEach((task, index) => {
@@ -267,5 +270,49 @@
         });
     }
 
-    function addTask() {
+    function handleFormSubmit(event) {
+        event.preventDefault(); // Stop page reload
+        
         const inputField = document.getElementById('nameIn');
+        const textValue = inputField.value.trim();
+        
+        if (!textValue) return;
+
+        myTasks.push({
+            name: textValue,
+            status: document.getElementById('statusIn').value,
+            tag: document.getElementById('tagIn').value
+        });
+
+        inputField.value = '';
+        renderTasks();
+    }
+
+    function triggerDopamine(index) {
+        const popup = document.getElementById('dopamineAlert');
+        popup.style.display = 'block';
+
+        setTimeout(() => {
+            popup.style.display = 'none';
+            myTasks.splice(index, 1);
+            renderTasks();
+        }, 2000);
+    }
+
+    function deleteItem(index) {
+        myTasks.splice(index, 1);
+        renderTasks();
+    }
+
+    function clearBoard() {
+        myTasks = [];
+        renderTasks();
+    }
+
+    // Shielded configuration loader matching any storage scenario
+    try {
+        let stored = localStorage.getItem('notion_todaytask_db');
+        if (stored) {
+            myTasks = JSON.parse(stored);
+        } else {
+            myTasks = [
