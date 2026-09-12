@@ -3,238 +3,579 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Today's Tasks ⚡</title>
+    <title>Today Tasks 🎯</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alice&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-inprogress: #e3f2fd; --text-inprogress: #1565c0; --dot-inprogress: #2196f3;
-            --bg-notstarted: #eceff1; --text-notstarted: #455a64; --dot-notstarted: #90a4ae;
-            --bg-big: #fce4ec; --text-big: #c2185b; --dot-big: #e91e63;
-            --bg-small: #e8f5e9; --text-small: #2e7d32; --dot-small: #4caf50;
-            --bg-urgent: #ffebee; --text-urgent: #c62828; --dot-urgent: #f44336;
+            --bg-glass: rgba(255, 255, 255, 0.92);
+            --border-glass: rgba(255, 255, 255, 0.95);
+            --border-soft: #F4E8EE;
+            
+            /* Accent color requested */
+            --accent-pink: #E25A91;
+            --accent-pink-hover: #D04980;
+            --accent-pink-subtle: #FDF0F5;
+            
+            /* Status Badge Colors */
+            --status-not-started-bg: #F5F5F7;
+            --status-not-started-text: #686873;
+            --status-in-progress-bg: #FFF4E5;
+            --status-in-progress-text: #B26A00;
+            --status-done-bg: #E8F5E9;
+            --status-done-text: #2E7D32;
+
+            /* Tag Colors */
+            --tag-big-bg: #EFE4FF;
+            --tag-big-text: #5B2C9D;
+            --tag-small-bg: #E3F2FD;
+            --tag-small-text: #1565C0;
+            --tag-urgent-bg: #FFEBEE;
+            --tag-urgent-text: #C62828;
+
+            --text-dark: #2B2326;
+            --text-muted: #8A7B82;
+            --shadow-soft: 0 10px 28px rgba(226, 90, 145, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Alice', Georgia, serif;
             background-color: transparent;
-            margin: 0;
-            padding: 4px;
+            padding: 8px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
         }
 
         .widget-container {
             width: 100%;
-            max-width: 600px;
-            background-color: #ffffff;
-            border: 1px solid #EFEAE4;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            max-width: 520px; /* Wider footprint */
+            background: var(--bg-glass);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 14px 16px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
         }
 
-        .banner-header {
-            background-color: #d85a7f; 
-            color: #ffffff;
-            padding: 12px 16px;
+        /* Bright #E25A91 Header */
+        .header-banner {
+            background-color: var(--accent-pink);
+            padding: 10px 14px;
+            border-radius: 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .banner-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin: 0;
-        }
-
-        .content-area { padding: 16px; }
-
-        .title-row {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #2C2526;
             margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(226, 90, 145, 0.25);
         }
 
-        .task-list { display: flex; flex-direction: column; }
+        .header-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-header {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 8px;
+            color: var(--accent-pink);
+            font-family: 'Alice', serif;
+            font-size: 0.72rem;
+            padding: 4px 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+        }
+
+        .btn-header:hover {
+            background: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* ADHD Focus Spotlight Container */
+        .focus-container {
+            background: #ffffff;
+            border: 2px solid var(--accent-pink);
+            border-radius: 14px;
+            padding: 18px 14px;
+            text-align: center;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 16px rgba(226, 90, 145, 0.15);
+        }
+
+        .focus-container.hidden {
+            display: none;
+        }
+
+        .focus-label {
+            font-size: 0.7rem;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: bold;
+        }
+
+        .focus-task-text {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin: 4px 0;
+            line-height: 1.3;
+        }
+
+        .focus-tags {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-focus-done {
+            background: var(--accent-pink);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-family: 'Alice', serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(226, 90, 145, 0.3);
+        }
+
+        .btn-focus-done:hover {
+            background: var(--accent-pink-hover);
+            transform: scale(1.02);
+        }
+
+        /* Main Task List */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .task-list.hidden {
+            display: none;
+        }
 
         .task-item {
+            background: #ffffff;
+            border: 1px solid var(--border-soft);
+            border-radius: 12px;
+            padding: 8px 12px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #F8F5F2;
+            justify-content: space-between;
+            gap: 10px;
+            transition: all 0.2s ease;
         }
-        .task-item:last-child { border-bottom: none; }
+
+        .task-item:hover {
+            border-color: rgba(226, 90, 145, 0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .task-item.done {
+            opacity: 0.6;
+            background: #FAFAFA;
+        }
 
         .task-left {
-            font-size: 0.95rem;
-            color: #2C2526;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             flex: 1;
-            padding-right: 12px;
+            min-width: 0;
         }
 
+        .task-name {
+            font-size: 0.86rem;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-item.done .task-name {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* Right-Aligned Badges */
         .task-right {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
         .badge {
-            font-size: 0.8rem;
-            padding: 3px 10px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-        }
-        
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
+            font-size: 0.65rem;
+            padding: 3px 7px;
+            border-radius: 6px;
+            font-family: 'Alice', serif;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.15s ease;
+            white-space: nowrap;
         }
 
-        .status-inprogress { background: var(--bg-inprogress); color: var(--text-inprogress); }
-        .status-inprogress .badge-dot { background: var(--dot-inprogress); }
-        .status-notstarted { background: var(--bg-notstarted); color: var(--text-notstarted); }
-        .status-notstarted .badge-dot { background: var(--dot-notstarted); }
+        .badge:hover {
+            transform: scale(1.05);
+        }
 
-        .tag-big { background: var(--bg-big); color: var(--text-big); }
-        .tag-big .badge-dot { background: var(--dot-big); }
-        .tag-small { background: var(--bg-small); color: var(--text-small); }
-        .tag-small .badge-dot { background: var(--dot-small); }
-        .tag-urgent { background: var(--bg-urgent); color: var(--text-urgent); }
-        .tag-urgent .badge-dot { background: var(--dot-urgent); }
+        /* Tag Pill Specifics */
+        .tag-size.big { background: var(--tag-big-bg); color: var(--tag-big-text); }
+        .tag-size.small { background: var(--tag-small-bg); color: var(--tag-small-text); }
+        .tag-urgent { background: var(--tag-urgent-bg); color: var(--tag-urgent-text); font-weight: bold; }
+
+        /* Status Badge Specifics */
+        .status-badge {
+            font-weight: bold;
+        }
+        .status-badge.not-started { background: var(--status-not-started-bg); color: var(--status-not-started-text); }
+        .status-badge.in-progress { background: var(--status-in-progress-bg); color: var(--status-in-progress-text); }
+        .status-badge.done { background: var(--status-done-bg); color: var(--status-done-text); }
 
         .btn-delete {
             background: none;
             border: none;
-            color: #DDD2D4;
+            color: var(--text-muted);
             cursor: pointer;
             font-size: 0.85rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
         }
-        .btn-delete:hover { color: #2C2526; }
 
-        .input-panel {
+        .btn-delete:hover {
+            opacity: 1;
+            color: #C62828;
+        }
+
+        /* Add Task Form */
+        .add-task-box {
+            background: var(--accent-pink-subtle);
+            border: 1px dashed var(--accent-pink);
+            border-radius: 12px;
+            padding: 8px 10px;
+            margin-top: 10px;
             display: flex;
             gap: 6px;
-            border-top: 1px solid #EFEAE4;
-            padding-top: 12px;
-            margin-top: 8px;
+            align-items: center;
         }
 
-        input, select {
-            border: 1px solid #EAE3DA;
-            border-radius: 6px;
+        .input-task {
+            flex: 1;
+            border: 1px solid var(--border-soft);
+            border-radius: 8px;
             padding: 6px 10px;
-            font-size: 0.85rem;
+            font-family: 'Alice', serif;
+            font-size: 0.8rem;
+            color: var(--text-dark);
             outline: none;
-            color: #2C2526;
             background: #ffffff;
-            height: 30px;
-            box-sizing: border-box;
         }
-        .input-name { flex: 1; }
+
+        .input-task:focus {
+            border-color: var(--accent-pink);
+        }
 
         .btn-add {
-            background-color: #2C2526;
-            color: white;
+            background: var(--accent-pink);
+            color: #ffffff;
             border: none;
-            border-radius: 6px;
-            padding: 0 14px;
-            font-size: 0.85rem;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: 'Alice', serif;
+            font-size: 0.78rem;
             cursor: pointer;
-            font-weight: bold;
-            height: 30px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-add:hover {
+            background: var(--accent-pink-hover);
+        }
+
+        .footer-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .btn-clear-done {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Alice', serif;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .btn-clear-done:hover {
+            color: var(--accent-pink);
         }
     </style>
 </head>
 <body>
 
 <div class="widget-container">
-    <div class="banner-header">
-        <div class="banner-title">Today's 3 Tasks</div>
-    </div>
-    
-    <div class="content-area">
-        <div class="title-row" id="countRow">0 tasks</div>
-        <div class="task-list" id="taskBox"></div>
-
-        <div class="input-panel">
-            <input type="text" id="nameIn" class="input-name" placeholder="+ New task...">
-            <select id="statusIn">
-                <option value="inprogress">In progress</option>
-                <option value="notstarted">Not started</option>
-            </select>
-            <select id="tagIn">
-                <option value="small">small</option>
-                <option value="big">BIG</option>
-                <option value="urgent">urgent</option>
-            </select>
-            <button class="btn-add" onclick="addTask()">Add</button>
+    <!-- Header -->
+    <div class="header-banner">
+        <span class="header-title">
+            <span>TODAY TASKS</span> 🎯
+        </span>
+        <div class="header-actions">
+            <button class="btn-header" id="focusToggleBtn" onclick="toggleFocusMode()">👁 Focus 1 Task</button>
         </div>
+    </div>
+
+    <!-- ADHD 1-Task Focus View (Hidden by Default) -->
+    <div class="focus-container hidden" id="focusView">
+        <div class="focus-label">✨ Current Priority Spotlight ✨</div>
+        <div class="focus-task-text" id="focusTaskText">No active task selected</div>
+        <div class="focus-tags" id="focusTaskTags"></div>
+        <button class="btn-focus-done" onclick="completeFocusTask()">Done! Next Task 🎉</button>
+    </div>
+
+    <!-- Full Task List -->
+    <div class="task-list" id="taskListContainer"></div>
+
+    <!-- Quick Task Add -->
+    <div class="add-task-box">
+        <input type="text" class="input-task" id="newTaskInput" placeholder="Add a clear, simple task..." onkeydown="handleKeyPress(event)">
+        <button class="btn-add" onclick="addNewTask()">+ Add</button>
+    </div>
+
+    <div class="footer-controls">
+        <span id="taskCountText">0 tasks remaining</span>
+        <button class="btn-clear-done" onclick="clearDoneTasks()">Clear Completed</button>
     </div>
 </div>
 
 <script>
-    // Simple temporary list template array (No local storage barriers)
-    let myTasks = [
-        { name: "Яндекс облако видео Man", status: "inprogress", tag: "big" },
-        { name: "избранное wb, ozon", status: "inprogress", tag: "small" }
+    const defaultTasks = [
+        { id: 1, name: "Review morning goals & tea", size: "SMALL", urgent: false, status: "Done" },
+        { id: 2, name: "Outline priority document", size: "BIG", urgent: true, status: "In Progress" },
+        { id: 3, name: "Send brief progress update", size: "SMALL", urgent: false, status: "Not Started" }
     ];
 
+    function safeLoadTasks() {
+        try {
+            const stored = localStorage.getItem('adhd_today_tasks_v2');
+            return stored ? JSON.parse(stored) : defaultTasks;
+        } catch (e) {
+            console.warn("LocalStorage restricted, using in-memory state.", e);
+            return defaultTasks;
+        }
+    }
+
+    function safeSaveTasks(data) {
+        try {
+            localStorage.setItem('adhd_today_tasks_v2', JSON.stringify(data));
+        } catch (e) {
+            console.warn("Unable to save to localStorage.", e);
+        }
+    }
+
+    let tasks = safeLoadTasks();
+    let isFocusMode = false;
+
     function renderTasks() {
-        const box = document.getElementById('taskBox');
-        box.innerHTML = '';
-        document.getElementById('countRow').innerText = `${myTasks.length} tasks`;
+        const container = document.getElementById('taskListContainer');
+        container.innerHTML = '';
 
-        myTasks.forEach((task, index) => {
-            const row = document.createElement('div');
-            row.className = 'task-item';
+        const activeCount = tasks.filter(t => t.status !== 'Done').length;
+        document.getElementById('taskCountText').innerText = `${activeCount} task${activeCount === 1 ? '' : 's'} remaining`;
 
-            let statusLabel = task.status === 'inprogress' ? 'In progress' : 'Not started';
-            let tagLabel = task.tag === 'big' ? 'BIG' : task.tag;
-
-            row.innerHTML = `
-                <div class="task-left">${task.name}</div>
-                <div class="task-right">
-                    <span class="badge status-${task.status}"><span class="badge-dot"></span>${statusLabel}</span>
-                    <span class="badge tag-${task.tag}"><span class="badge-dot"></span>${tagLabel}</span>
-                    <button class="btn-delete" onclick="deleteItem(${index})">✕ Done</button>
+        if (tasks.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 14px; font-size: 0.78rem; color: var(--text-muted); font-style: italic;">
+                    All clear! Add a task below to start your day without overwhelm 🌸
                 </div>
             `;
-            box.appendChild(row);
+            return;
+        }
+
+        tasks.forEach((task, index) => {
+            const item = document.createElement('div');
+            item.className = `task-item ${task.status === 'Done' ? 'done' : ''}`;
+
+            const statusClass = task.status.toLowerCase().replace(' ', '-');
+            const statusLabel = task.status === 'Done' ? 'Done ✅' : (task.status === 'In Progress' ? 'In Progress ⌛️' : 'Not Started');
+
+            item.innerHTML = `
+                <div class="task-left">
+                    <span class="task-name" title="${task.name}">${task.name}</span>
+                </div>
+                <div class="task-right">
+                    <span class="badge tag-size ${task.size.toLowerCase()}" onclick="toggleTaskSize(${index})" title="Click to switch BIG/SMALL">
+                        ${task.size === 'BIG' ? '🐘 BIG' : '⚡️ SMALL'}
+                    </span>
+                    ${task.urgent ? `<span class="badge tag-urgent" onclick="toggleTaskUrgent(${index})" title="Click to toggle Urgency">🔥 Urgent</span>` : `<span class="badge" style="background:#F2F0F2; color:#A09098;" onclick="toggleTaskUrgent(${index})">+ Urgent</span>`}
+                    <span class="badge status-badge ${statusClass}" onclick="cycleTaskStatus(${index})" title="Click to change Status">
+                        ${statusLabel}
+                    </span>
+                    <button class="btn-delete" onclick="deleteTask(${index})" title="Delete Task">✕</button>
+                </div>
+            `;
+            container.appendChild(item);
         });
+
+        if (isFocusMode) {
+            updateFocusView();
+        }
     }
 
-    function addTask() {
-        const inputField = document.getElementById('nameIn');
-        const textValue = inputField.value.trim();
-        
-        if (!textValue) return;
-
-        myTasks.push({
-            name: textValue,
-            status: document.getElementById('statusIn').value,
-            tag: document.getElementById('tagIn').value
-        });
-
-        inputField.value = '';
+    function toggleTaskSize(index) {
+        tasks[index].size = tasks[index].size === 'BIG' ? 'SMALL' : 'BIG';
+        safeSaveTasks(tasks);
         renderTasks();
     }
 
-    function deleteItem(index) {
-        myTasks.splice(index, 1);
+    function toggleTaskUrgent(index) {
+        tasks[index].urgent = !tasks[index].urgent;
+        safeSaveTasks(tasks);
         renderTasks();
     }
 
-    // Initialize list rows on start load grid
-    renderTasks();
+    function cycleTaskStatus(index) {
+        const statuses = ['Not Started', 'In Progress', 'Done'];
+        const currentIdx = statuses.indexOf(tasks[index].status);
+        const nextIdx = (currentIdx + 1) % statuses.length;
+        tasks[index].status = statuses[nextIdx];
+        safeSaveTasks(tasks);
+        renderTasks();
+    }
+
+    function addNewTask() {
+        const input = document.getElementById('newTaskInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        tasks.push({
+            id: Date.now(),
+            name: text,
+            size: 'SMALL',
+            urgent: false,
+            status: 'Not Started'
+        });
+
+        input.value = '';
+        safeSaveTasks(tasks);
+        renderTasks();
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            addNewTask();
+        }
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        safeSaveTasks(tasks);
+        renderTasks();
+    }
+
+    function clearDoneTasks() {
+        tasks = tasks.filter(t => t.status !== 'Done');
+        safeSaveTasks(tasks);
+        renderTasks();
+    }
+
+    /* ADHD Focus Mode Functions */
+    function toggleFocusMode() {
+        isFocusMode = !isFocusMode;
+        const focusView = document.getElementById('focusView');
+        const listContainer = document.getElementById('taskListContainer');
+        const btn = document.getElementById('focusToggleBtn');
+
+        if (isFocusMode) {
+            focusView.classList.remove('hidden');
+            listContainer.classList.add('hidden');
+            btn.innerText = '📋 Show All';
+            updateFocusView();
+        } else {
+            focusView.classList.add('hidden');
+            listContainer.classList.remove('hidden');
+            btn.innerText = '👁 Focus 1 Task';
+        }
+    }
+
+    function updateFocusView() {
+        // Find first in-progress or not-started task
+        const target = tasks.find(t => t.status === 'In Progress') || tasks.find(t => t.status === 'Not Started');
+        const textEl = document.getElementById('focusTaskText');
+        const tagsEl = document.getElementById('focusTaskTags');
+
+        if (!target) {
+            textEl.innerText = "All tasks completed! You're amazing 🎉";
+            tagsEl.innerHTML = '';
+            return;
+        }
+
+        textEl.innerText = target.name;
+        tagsEl.innerHTML = `
+            <span class="badge tag-size ${target.size.toLowerCase()}">${target.size === 'BIG' ? '🐘 BIG Task' : '⚡️ Quick Win'}</span>
+            ${target.urgent ? `<span class="badge tag-urgent">🔥 High Priority</span>` : ''}
+        `;
+    }
+
+    function completeFocusTask() {
+        const targetIndex = tasks.findIndex(t => t.status === 'In Progress') !== -1 
+            ? tasks.findIndex(t => t.status === 'In Progress')
+            : tasks.findIndex(t => t.status === 'Not Started');
+
+        if (targetIndex !== -1) {
+            tasks[targetIndex].status = 'Done';
+            safeSaveTasks(tasks);
+            renderTasks();
+        }
+    }
+
+    function initWidget() {
+        renderTasks();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWidget);
+    } else {
+        initWidget();
+    }
 </script>
 
 </body>
