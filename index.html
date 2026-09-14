@@ -59,7 +59,7 @@
 
         .widget-container {
             width: 100%;
-            max-width: 520px; /* Wider footprint */
+            max-width: 520px;
             background: var(--bg-glass);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
@@ -189,11 +189,10 @@
             background: #ffffff;
             border: 1px solid var(--border-soft);
             border-radius: 12px;
-            padding: 8px 12px;
+            padding: 10px 12px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
             transition: all 0.2s ease;
         }
 
@@ -207,20 +206,20 @@
             background: #FAFAFA;
         }
 
-        .task-left {
+        /* Row 1: Task Title & Delete Button */
+        .task-top-row {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
-            flex: 1;
-            min-width: 0;
+            width: 100%;
         }
 
         .task-name {
-            font-size: 0.86rem;
+            font-size: 0.9rem;
             color: var(--text-dark);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            word-break: break-word;
+            line-height: 1.35;
         }
 
         .task-item.done .task-name {
@@ -228,12 +227,12 @@
             color: var(--text-muted);
         }
 
-        /* Right-Aligned Badges */
-        .task-right {
+        /* Row 2: Badges below title */
+        .task-bottom-row {
             display: flex;
             align-items: center;
             gap: 6px;
-            flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .badge {
@@ -438,10 +437,11 @@
             const statusLabel = task.status === 'Done' ? 'Done ✅' : (task.status === 'In Progress' ? 'In Progress ⌛️' : 'Not Started');
 
             item.innerHTML = `
-                <div class="task-left">
+                <div class="task-top-row">
                     <span class="task-name" title="${task.name}">${task.name}</span>
+                    <button class="btn-delete" onclick="deleteTask(${index})" title="Delete Task">✕</button>
                 </div>
-                <div class="task-right">
+                <div class="task-bottom-row">
                     <span class="badge tag-size ${task.size.toLowerCase()}" onclick="toggleTaskSize(${index})" title="Click to switch BIG/SMALL">
                         ${task.size === 'BIG' ? '🐘 BIG' : '⚡️ SMALL'}
                     </span>
@@ -449,7 +449,6 @@
                     <span class="badge status-badge ${statusClass}" onclick="cycleTaskStatus(${index})" title="Click to change Status">
                         ${statusLabel}
                     </span>
-                    <button class="btn-delete" onclick="deleteTask(${index})" title="Delete Task">✕</button>
                 </div>
             `;
             container.appendChild(item);
